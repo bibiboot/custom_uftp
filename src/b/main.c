@@ -13,15 +13,19 @@ void init(){
 
     // 10MB
     // 10485760
+    printf("Waiting for 10MB file\n");
     globals.config.total_size = 10485760;
 
     // Create data list
+    printf("[DEBUG] Create DATA and NACK list\n");
     create_recv_list(&globals.datal, DATA);
     create_recv_list(&globals.nackl, NACK);
 
     strcpy(globals.recv_filename, "etc/data/recv.bin");
+    printf("[DEBUG] Recieved filename : %s\n", globals.recv_filename);
 
     // Create socket connection
+    printf("[DEBUG] Connection setup\n");
     reciever_conn_setup();
     sender_conn_setup();
 }
@@ -33,16 +37,25 @@ void start(){
     pthread_create(&globals.rev_th, 0, sender, val);
 }
 
+void cmd_parser(int argc, char *argv[])
+{
+    if (argc != 2) {
+        printf("[SUMMARY] Error in command line parsing\n");
+        exit(1);
+    }
+
+    strcpy(globals.hostname_a, argv[1]);
+}
+
 int main(int argc, char *argv[]){
 
-    // Initilaization
+    cmd_parser(argc, argv);
+
     init();
 
-    // Fork and start sending
     start();
 
-    // Wait for both the childs to get over
     pthread_join(globals.sen_th, NULL);
     pthread_join(globals.rev_th, NULL);
-    DBG("-------------CLOSE DOWN----------");
+    printf("[SUMMARY] Exiting the program\n");
 }

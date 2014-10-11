@@ -5,7 +5,9 @@ void* sender(void *v){
     My402ListElem *elem=NULL;
     bool is_retransmitted = false;
 
-    for (elem=My402ListFirst(&globals.datal); elem != NULL; elem=My402ListNext(&globals.datal, elem)) {
+    printf("[SUMMARY] Start Sending.....\n");
+    for (elem=My402ListFirst(&globals.datal); elem != NULL;
+            elem=My402ListNext(&globals.datal, elem)) {
         struct node *data_node = (elem->obj);
         int n = send_packet(data_node, is_retransmitted);
         if (n < 0) {
@@ -13,13 +15,15 @@ void* sender(void *v){
             exit(1);
         }
     }
+    printf("[SUMMARY] Sender has tried sending complete file.....\n");
 
     // The nodeA knows that last bit is send
     globals.last_bit_send = true;
 
     // Send dummy data denotes the end of sending data
     send_dummy_packet();
-    DBG("[SUMMARY] START SENDER %u, RETRANS %llu", to_micro(globals.a_sender_start), globals.total_retrans);
+    printf("[SUMMARY] Start time : %u, Number of retransmission : %llu\n",
+            to_micro(globals.a_sender_start), globals.total_retrans);
 }
 
 int send_packet(struct node *data_node, bool is_retransmitted){
@@ -47,19 +51,9 @@ int send_dummy_packet(){
     char *buffer;
     vlong buffer_len = create_dummy_packet(&buffer);
 
-    int n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
-    n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
+    for (i = 0; i <= 10; i++)
+        sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
+
     free(buffer);
     return n;
 }

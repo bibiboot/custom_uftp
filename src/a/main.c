@@ -13,12 +13,14 @@ void init(){
 
     // Create memory map files
     char *data_ptr = get_memory_map_ptr(globals.filename, &globals.config.total_size);
-    DBG("SIZE = %llu", globals.config.total_size);
+    printf("[DEBUG] Creating memory map of the file, size = %llu \n", globals.config.total_size);
 
     // Create data list
+    printf("[DEBUG] Creating data list\n");
     create_list(data_ptr, &globals.datal, DATA);
 
     // Create socket connection
+    printf("[DEBUG] Connection setup\n");
     reciever_conn_setup();
     sender_conn_setup();
 }
@@ -54,7 +56,8 @@ int main(int argc, char *argv[]){
     if (cmd_parser(argc, argv) != 0) {
         DBG("Error in parsing command line");
     }
-    printf("SRC : %s, DEST : %s\n", globals.filename, globals.recv_filename);
+    printf("[SUMMARY] Source filename : %s, Dest filename : %s\n",
+            globals.filename, globals.recv_filename);
 
     // Initilaization
     init();
@@ -65,5 +68,5 @@ int main(int argc, char *argv[]){
     // Wait for both the childs to get over
     pthread_join(globals.sen_th, NULL);
     //pthread_join(globals.rev_th, NULL);
-    DBG("---------CLOSING DOWN-------");
+    DBG("Exiting");
 }

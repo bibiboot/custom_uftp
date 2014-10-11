@@ -91,7 +91,7 @@ vlong get_packet_data_dummy(char *buffer, int size_recieved,
     curr_buffer += CHECKSUM_LEN;
     memcpy(*payload, curr_buffer, payload_size);
     strcpy(globals.recv_filename, *payload);
-    DBG("DUMMY PAYLOAD: %s", *payload);
+    //DBG("DUMMY PAYLOAD: %s", *payload);
 
     return payload_size;
 }

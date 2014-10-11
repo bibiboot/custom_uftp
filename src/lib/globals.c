@@ -10,8 +10,6 @@ struct globals globals = {
     // Used by nodeB for detecting if dummy packet arrived or not
     .last_bit_arrived = false,
     .last_bit_send = false,
-    // Hostname of nodeA
-    .hostname_a = "sen",
     .total_retrans = 0
 };
 
@@ -49,7 +47,7 @@ int send_nack_packet(){
         // Create nack packet
         char *buffer;
         vlong buffer_len = create_nack_packet(&buffer, data_node->seq_num);
-        //DBG("[NACK SEND] SEQ NUM: %llu", data_node->seq_num);
+        DBG("[NACK SEND] SEQ NUM: %llu", data_node->seq_num);
 
         // Send nack packet
         int n = sendto(globals.b_sender_fd, buffer, buffer_len, 0, to, tolen);

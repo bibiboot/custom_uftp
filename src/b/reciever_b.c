@@ -1,16 +1,9 @@
 #include "reciever_b.h"
 
 bool is_nack_list_empty() {
-    //DBG("NUM NACK LIST = %d", (globals.nackl).num_members);
     if ((globals.nackl).num_members == 0) {
         return true;
     } else {
-        // Print the list
-        //DBG("---------");
-        //print_list(&globals.nackl);
-        //DBG("---------");
-        // Send nack packet
-        //send_nack_packet();
         return false;
     }
 }
@@ -19,8 +12,9 @@ bool is_last_packet_recieved() {
     return globals.last_bit_arrived;
 }
 
-void *reciever(void *val){
-
+void *reciever(void *val)
+{
+    printf("[DEBUG] Waiting for data to arrive......\n");
     while (1){
         // If last packet is recieved
         // break out of the loop
@@ -30,19 +24,18 @@ void *reciever(void *val){
             // Break out of the loop
             // Return
             // TODO: Delete the nack timer
-            DBG("NACK is EMPTY");
+            printf("[DEBUG] NACK list is empty and last bit received\n");
             goto COMPLETE_FILE_REACHED;
         }
 
-        //DBG(".........Waiting.......");
         int n=recv_packet();
     }
 COMPLETE_FILE_REACHED:
     gettimeofday(&globals.b_reciever_end, NULL);
-    DBG("[TIME] END RECIEVER %u", to_micro(globals.b_reciever_end));
-    DBG("Complete file is downloaded");
+    printf("[SUMMARY] Complete file received, end-time : %u\n", to_micro(globals.b_reciever_end));
     write_data_list_to_file(globals.recv_filename);
     // Cancel the other thread
+    printf("[DEBUG] Cancel the timer thread\n");
     pthread_cancel(globals.rev_th);
 }
 
@@ -82,7 +75,6 @@ void data_packet_handler(char *buffer, int size_recieved) {
 
     char *seq_num, *checksum, *payload;
     vlong payload_size = get_packet_data(buffer, size_recieved, &seq_num, &checksum, &payload);
-    //DBG("CHECKSUM : [%s]", checksum);
     vlong sq_num= atoll(seq_num);
 
     vlong seq_num_int = atoi(seq_num);
@@ -116,19 +108,18 @@ void data_packet_handler(char *buffer, int size_recieved) {
 void dummy_packet_handler(char *buffer, int size_recieved) {
 
     if (globals.last_bit_arrived) {
-        DBG("[DUPLICATE DUMMY]");
+        printf("[DEBUG] Duplicate Dummy packet received\n");
         return;
     }
 
     gettimeofday(&globals.dummy_reached, NULL);
     // On the bit for last bit arrived
     globals.last_bit_arrived = true;
-    DBG("[DUMMY RECV]: [%s]", buffer);
+    printf("[DEBUG] Dummy packet receieved, denoting the end of the last bit : [%s]\n", buffer);
 
     // Get checksum and filename of the destination
     char *checksum, *payload;
     vlong payload_size = get_packet_data_dummy(buffer, size_recieved, &checksum, &payload);
     // Payload here is the filename
-    //TODO: Free the checksum
     free(checksum);
 }

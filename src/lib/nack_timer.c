@@ -37,7 +37,3 @@ void register_signal(){
     alarm(globals.config.nack_timer);
     sigsuspend(&mask);
 }
-
-
-
-

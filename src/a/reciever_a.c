@@ -7,7 +7,7 @@ void *reciever(void *v){
     struct sockaddr_in from;
     int fromlen = sizeof(struct sockaddr_in);
 
-    DBG("[START] START SENDER %u", to_micro(globals.a_sender_start));
+    printf("[DEBUG] Waiting for NACK.....\n");
     while (1){
         int size_recieved=recvfrom(globals.a_recv_fd,
                                    buffer, globals.config.read_buffer_size, 0,
@@ -16,28 +16,21 @@ void *reciever(void *v){
             perror("Error in recv");
             exit(1);
         }
+        printf("DEBUG] Recived a NACK\n");
         int packet_type = get_recieved_packet_type(buffer);
 
         switch (packet_type) {
-            case DATA_PACKET:
-                data_packet_handler(buffer, size_recieved);
-                break;
             case NACK_PACKET:
                 nack_packet_handler(buffer, size_recieved);
                 break;
-            case DUMMY_PACKET:
-                dummy_packet_handler(buffer, size_recieved);
-                break;
+            default:
+                printf("[SUMMARY] Unknown packet type\n");
         }
     }
 }
 
-
-void data_packet_handler(char *buffer, int size_recieved) {}
-
-void dummy_packet_handler(char *buffer, int size_recieved) {}
-
 void nack_packet_handler(char *buffer, int size_recieved){
+    printf("[DEBUG] NACK recieved\n");
     char *checksum, *payload;
     vlong payload_size = get_packet_data_nack(buffer, size_recieved, &checksum, &payload);
 
@@ -52,13 +45,13 @@ void nack_packet_handler(char *buffer, int size_recieved){
 
     // Retransmit the data back again with sequence number
     globals.total_retrans++;
-    //printf("[RETRANS SEND]: TOTAL %llu", globals.total_retrans);
+    printf("[RETRANS SEND]: TOTAL %llu", globals.total_retrans);
     int n = send_packet(data_node);
     if (n < 0) {
         perror("Retransmiston: Error in sending packet");
         exit(1);
     }
-    //TODO: Free payload and checksum
+
     free(payload);
     free(checksum);
 }

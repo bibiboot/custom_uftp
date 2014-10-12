@@ -17,8 +17,9 @@ int get_recieved_packet_type(char *packet, vlong size){
     } else if (*packet == DUMMY_TOKEN) {
         return DUMMY_PACKET;
     } else {
-        DBG("This should never happen");
-        exit(1);
+        //DBG("This should never happen");
+        //exit(1);
+        return -1;
     }
 }
 

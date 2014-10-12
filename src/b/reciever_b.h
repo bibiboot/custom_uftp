@@ -2,7 +2,7 @@
 
 void *reciever(void *val);
 
-int recv_packet();
+int recv_packet(char *buffer, int payload_size);
 
 void data_packet_handler(char *buffer, int size_recieved);
 

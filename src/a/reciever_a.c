@@ -1,31 +1,64 @@
 #include "reciever_a.h"
+#include "filter.h"
 
-void *reciever(void *v){
-    char buffer[globals.config.read_buffer_size];
-    bzero(buffer,globals.config.read_buffer_size);
+bool is_nack_list_empty() {
+    if ((globals.nackl).num_members == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
-    struct sockaddr_in from;
-    int fromlen = sizeof(struct sockaddr_in);
+void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
+{
+    int saddr_size = sizeof saddr;
+    // Receive a packet
+    int data_size = recvfrom(sock_raw , buffer , PACKET_LEN ,
+                             0 , &saddr , (socklen_t*)&saddr_size);
+    if(data_size <0 )
+    {
+        printf("Error: Recvfrom error , failed to get packets\n");
+        return ;
+    }
 
-    printf("[DEBUG] Waiting for NACK.....\n");
+    if ( !is_allowed(buffer) )
+        return;
+
+    unsigned char *payload = buffer + C_HLEN;
+    int payload_size = data_size - C_HLEN;
+
+    printf("DEBUG] Recived a NACK\n");
+    int packet_type = get_recieved_packet_type(payload);
+
+    switch (packet_type) {
+        case NACK_PACKET:
+            nack_packet_handler(payload, payload_size);
+            break;
+        default:
+            printf("[SUMMARY] Unknown packet type\n");
+    }
+
+    //memset(payload_size, '\0', PACKET_LEN);
+}
+
+void *reciever(void *v)
+{
+    int saddr_size , data_size;
+    struct sockaddr saddr;
+    unsigned char *buffer = (unsigned char *) malloc(PACKET_LEN);
+
+    printf("Starting...\n");
+
+    int sock_raw = socket( AF_PACKET , SOCK_RAW , htons(ETH_P_ALL)) ;
+
+    if (sock_raw < 0) {
+        perror("Socket Error");
+        return;
+    }
+
     while (1){
-        int size_recieved=recvfrom(globals.a_recv_fd,
-                                   buffer, globals.config.read_buffer_size, 0,
-                       (struct sockaddr *)&from, &fromlen);
-        if (size_recieved < 0) {
-            perror("Error in recv");
-            exit(1);
-        }
-        printf("DEBUG] Recived a NACK\n");
-        int packet_type = get_recieved_packet_type(buffer);
-
-        switch (packet_type) {
-            case NACK_PACKET:
-                nack_packet_handler(buffer, size_recieved);
-                break;
-            default:
-                printf("[SUMMARY] Unknown packet type\n");
-        }
+        memset(buffer, '\0', PACKET_LEN);
+        sniff_packet(sock_raw, buffer, saddr);
     }
 }
 

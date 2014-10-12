@@ -14,7 +14,9 @@
 
 #include "uthash.h"
 #include "config.h"
+#include "cprotocol.h"
 #include "my402list.h"
+#include "color.h"
 
 // Print function name, filename and line number in print
 #define DEBUG(fmt, ...) printf("%s:%d: " fmt, __FILE__, __LINE__, __VA_ARGS__);
@@ -38,6 +40,13 @@
 #define PACKET_TYPE_LEN 1
 #define SEQ_NUM_LEN 12
 #define CHECKSUM_LEN 10
+
+//#define INF0 "eth0"
+#define INF0 "wlan0"
+
+#define PACKET_LEN 65536
+
+FILE *LOGFILE;
 
 typedef long long unsigned int vlong;
 
@@ -73,13 +82,13 @@ struct globals {
     // Current maximum recieved seq num
     vlong current_seq;
     // Reciever fd
-    int a_recv_fd;
-    int b_recv_fd;
+    //int a_recv_fd;
+    //int b_recv_fd;
     // Sender fd
-    int a_sender_fd;
-    int b_sender_fd;
+    //int a_sender_fd;
+    //int b_sender_fd;
     // Socket address to the reciever used by NodeB
-    struct sockaddr_in serv_addr;
+    //struct sockaddr_in serv_addr;
     // Stores the hostname of nodeB provided at command line
     char hostname_b[100];
     char hostname_a[100];
@@ -93,8 +102,12 @@ struct globals {
     struct timeval a_sender_start;
     struct timeval dummy_reached;
     struct timeval b_reciever_end;
-    pthread_t sen_th, rev_th;
+    //pthread_t sen_th, rev_th;
     long long unsigned int total_retrans;
+
+    pthread_t sniff_th, sender_th;
+    uint16_t src_node, dest_node;
+    int send_sock_fd;
 };
 
 extern struct globals globals;

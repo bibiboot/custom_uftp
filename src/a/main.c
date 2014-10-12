@@ -5,9 +5,9 @@
 #include "list.h"
 #include "parser.h"
 #include "packetize.h"
-#include "conn_a.h"
 #include "sender_a.h"
 #include "reciever_a.h"
+#include "socket_util.h"
 
 void init(){
 
@@ -18,11 +18,6 @@ void init(){
     // Create data list
     printf("[DEBUG] Creating data list\n");
     create_list(data_ptr, &globals.datal, DATA);
-
-    // Create socket connection
-    printf("[DEBUG] Connection setup\n");
-    reciever_conn_setup();
-    sender_conn_setup();
 }
 
 int cmd_parser(int argc, char *argv[]){
@@ -36,18 +31,18 @@ int cmd_parser(int argc, char *argv[]){
     }
 
     strcpy(globals.filename, argv[1]);
+    globals.src_node = 1;
+    globals.dest_node = 2;
 
     return 0;
 }
 
 void start(){
     gettimeofday(&globals.a_sender_start, NULL);
+
     void *val;
-
-    //print_list(&globals.datal);
-
-    pthread_create(&globals.sen_th, 0, reciever, val);
-    pthread_create(&globals.rev_th, 0, sender, val);
+    pthread_create(&globals.sniff_th, 0, reciever, val);
+    pthread_create(&globals.sender_th, 0, sender, val);
 }
 
 int main(int argc, char *argv[]){
@@ -59,6 +54,8 @@ int main(int argc, char *argv[]){
     printf("[SUMMARY] Source filename : %s, Dest filename : %s\n",
             globals.filename, globals.recv_filename);
 
+    globals.send_sock_fd = get_socket();
+
     // Initilaization
     init();
 
@@ -66,7 +63,7 @@ int main(int argc, char *argv[]){
     start();
 
     // Wait for both the childs to get over
-    pthread_join(globals.sen_th, NULL);
-    //pthread_join(globals.rev_th, NULL);
-    DBG("Exiting");
+    pthread_join(globals.sender_th, NULL);
+    pthread_join(globals.sniff_th, NULL);
+    printf("[SUMMARY] Program is exiting\n");
 }

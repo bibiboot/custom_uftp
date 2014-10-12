@@ -26,34 +26,41 @@ void* sender(void *v){
             to_micro(globals.a_sender_start), globals.total_retrans);
 }
 
-int send_packet(struct node *data_node, bool is_retransmitted){
-    struct sockaddr *to = (struct sockaddr *)&globals.serv_addr;
-    int tolen = sizeof(struct sockaddr);
-
+int send_packet(struct node *data_node, bool is_retransmitted)
+{
     // Create data packet
     // Add checksum and packet_type bit
-    char *buffer;
-    vlong buffer_len = create_data_packet(data_node->mem_ptr, data_node->size,
-                                          data_node->seq_num, &buffer, is_retransmitted);
+    char *payload;
+    vlong payload_size = create_data_packet(data_node->mem_ptr, data_node->size,
+                                            data_node->seq_num, &payload,
+                                            is_retransmitted);
 
-    int n = sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
+    int packet_size = payload_size + C_HLEN;
+    char *packet = malloc(packet_size);
+    printf("Data size = %d\n", packet_size);
+    printf("Payload size = %llu\n", payload_size);
 
-    free(buffer);
-    return n;
+    create_packet(packet, NODE2_MAC, NODE1_IP, NODE2_IP, DATA_PORT, payload, payload_size);
+
+    send_packet_on_line(INF0, packet, packet_size);
+
+    free(payload);
+    return packet_size;
 }
 
 int send_dummy_packet(){
-    struct sockaddr *to = (struct sockaddr *)&globals.serv_addr;
-    int tolen = sizeof(struct sockaddr);
-
     // Create data packet
     // Add checksum and packet_type bit
-    char *buffer;
-    vlong buffer_len = create_dummy_packet(&buffer);
+    char *payload;
+    vlong payload_size = create_dummy_packet(&payload);
+    int packet_size = payload_size + C_HLEN;
+    char *packet = malloc(packet_size);
+    create_packet(packet, NODE2_MAC, NODE1_IP, NODE2_IP, DATA_PORT, payload, payload_size);
 
-    for (i = 0; i <= 10; i++)
-        sendto(globals.a_sender_fd, buffer, buffer_len, 0, to, tolen);
+    int i;
+    for (i = 0; i <= 10000; i++)
+        send_packet_on_line(INF0, packet, packet_size);
 
-    free(buffer);
-    return n;
+    free(payload);
+    return 0;
 }

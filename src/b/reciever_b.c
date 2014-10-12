@@ -1,4 +1,9 @@
 #include "reciever_b.h"
+#include "filter.h"
+#include "print_packet.h"
+
+#define PACKET_LEN 65536
+void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr);
 
 bool is_nack_list_empty() {
     if ((globals.nackl).num_members == 0) {
@@ -14,6 +19,27 @@ bool is_last_packet_recieved() {
 
 void *reciever(void *val)
 {
+    int saddr_size , data_size;
+    struct sockaddr saddr;
+    unsigned char *buffer = (unsigned char *) malloc(PACKET_LEN);
+    memset(buffer, '\0', PACKET_LEN);
+
+    printf("Starting...\n");
+
+    int sock_raw = socket( AF_PACKET , SOCK_RAW , htons(ETH_P_ALL)) ;
+
+    if (sock_raw < 0) {
+        perror("Socket Error");
+        return;
+    }
+
+    /**
+     * Set it on promiscous mode,
+     * Otherwise it won't sniff packet
+     * Which do not belong to him
+     */
+    set_promisc(INF0, sock_raw);
+
     printf("[DEBUG] Waiting for data to arrive......\n");
     while (1){
         // If last packet is recieved
@@ -28,7 +54,8 @@ void *reciever(void *val)
             goto COMPLETE_FILE_REACHED;
         }
 
-        int n=recv_packet();
+        sniff_packet(sock_raw, buffer, saddr);
+        memset(buffer, '\0', PACKET_LEN);
     }
 COMPLETE_FILE_REACHED:
     gettimeofday(&globals.b_reciever_end, NULL);
@@ -36,39 +63,58 @@ COMPLETE_FILE_REACHED:
     write_data_list_to_file(globals.recv_filename);
     // Cancel the other thread
     printf("[DEBUG] Cancel the timer thread\n");
-    pthread_cancel(globals.rev_th);
+    pthread_cancel(globals.sender_th);
 }
 
-int recv_packet(){
-    char buffer[globals.config.read_buffer_size];
-    bzero(buffer,globals.config.read_buffer_size);
-
-    struct sockaddr_in from;
-    int fromlen = sizeof(struct sockaddr_in);
-
-    int size_recieved=recvfrom(globals.b_recv_fd, buffer, globals.config.read_buffer_size, 0,
-                               (struct sockaddr *)&from, &fromlen);
-    if (size_recieved < 0) {
-        perror("Error in recv");
-        exit(1);
+void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
+{
+    int saddr_size = sizeof saddr;
+    // Receive a packet
+    int data_size = recvfrom(sock_raw , buffer , PACKET_LEN ,
+                             0 , &saddr , (socklen_t*)&saddr_size);
+    if(data_size <0 )
+    {
+        printf("Error: Recvfrom error , failed to get packets\n");
+        return ;
     }
 
+    if ( !is_allowed(buffer) )
+        return;
+
+
+    unsigned char *payload = buffer + C_HLEN;
+    int payload_size = (data_size - 8);
+
+    printf("Header size = %d\n", C_HLEN);
+    printf("Data size xxx = %d\n", data_size);
+    printf("Payload size = %d\n", payload_size);
+    printf("Payload size = %d\n", data_size - 8);
+
+    print_human_read_payload(buffer, data_size);
+    //payload_size = 50;
+    recv_packet(payload, payload_size);
+
+    memset(buffer, '\0', PACKET_LEN);
+}
+
+int recv_packet(char *buffer, int payload_size){
     // Check the packet with checksum
     // If no match then return i.e. drop packet
     int packet_type = get_recieved_packet_type(buffer);
 
     switch (packet_type) {
         case DATA_PACKET:
-            data_packet_handler(buffer, size_recieved);
-            break;
-        case NACK_PACKET:
-            //nack_packet_handler(size_recieved);
+            data_packet_handler(buffer, payload_size);
+            printf(KGRN "Data receieved\n" RESET);
             break;
         case DUMMY_PACKET:
-            dummy_packet_handler(buffer, size_recieved);
+            dummy_packet_handler(buffer, payload_size);
+            printf(KGRN "Dummy receieved\n" RESET);
             break;
+        default:
+            printf(KRED "[DEBUG] packet type not matched, packet dropped\n" RESET);
     }
-    return size_recieved;
+    return 0;
 }
 
 void data_packet_handler(char *buffer, int size_recieved) {

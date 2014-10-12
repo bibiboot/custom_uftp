@@ -10,7 +10,8 @@ struct globals globals = {
     // Used by nodeB for detecting if dummy packet arrived or not
     .last_bit_arrived = false,
     .last_bit_send = false,
-    .total_retrans = 0
+    .total_retrans = 0,
+    .total_nack_recv = 0
 };
 
 /**
@@ -40,12 +41,13 @@ int send_nack_packet()
         int packet_size = payload_size + C_HLEN;
         char *packet = malloc(packet_size);
 
-        create_packet(packet, 1, 2, 1, DATA_PORT, buffer, payload_size);
+        create_packet(packet, ROUTER_MAC, NODE2_IP, NODE1_IP, DATA_PORT, buffer, payload_size);
 
         send_packet_on_line(INF0, packet, packet_size);
 
         free(buffer);
         total_len++;
+        //if(total_len>100) break;
     }
     printf("[SIGNAL] NACK LEN: %llu\n", total_len);
     return 0;

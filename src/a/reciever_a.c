@@ -27,18 +27,17 @@ void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
     unsigned char *payload = buffer + C_HLEN;
     int payload_size = data_size - C_HLEN;
 
-    printf("DEBUG] Recived a NACK\n");
     int packet_type = get_recieved_packet_type(payload);
 
     switch (packet_type) {
         case NACK_PACKET:
+            //printf("DEBUG] Recived a NACK\n");
             nack_packet_handler(payload, payload_size);
+            globals.total_nack_recv++;
             break;
         default:
             printf("[SUMMARY] Unknown packet type\n");
     }
-
-    //memset(payload_size, '\0', PACKET_LEN);
 }
 
 void *reciever(void *v)
@@ -63,7 +62,6 @@ void *reciever(void *v)
 }
 
 void nack_packet_handler(char *buffer, int size_recieved){
-    printf("[DEBUG] NACK recieved\n");
     char *checksum, *payload;
     vlong payload_size = get_packet_data_nack(buffer, size_recieved, &checksum, &payload);
 
@@ -78,7 +76,7 @@ void nack_packet_handler(char *buffer, int size_recieved){
 
     // Retransmit the data back again with sequence number
     globals.total_retrans++;
-    printf("[RETRANS SEND]: TOTAL %llu", globals.total_retrans);
+    //printf("[RETRANS SEND]: TOTAL %llu", globals.total_retrans);
     int n = send_packet(data_node);
     if (n < 0) {
         perror("Retransmiston: Error in sending packet");

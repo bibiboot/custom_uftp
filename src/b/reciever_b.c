@@ -85,12 +85,11 @@ void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
     unsigned char *payload = buffer + C_HLEN;
     int payload_size = (data_size - 8);
 
-    printf("Header size = %d\n", C_HLEN);
-    printf("Data size xxx = %d\n", data_size);
-    printf("Payload size = %d\n", payload_size);
-    printf("Payload size = %d\n", data_size - 8);
+    //printf("Data size xxx = %d\n", data_size);
+    //printf("Payload size = %d\n", payload_size);
+    //printf("Payload size = %d\n", data_size - 8);
 
-    print_human_read_payload(buffer, data_size);
+    //print_human_read_payload(buffer, data_size);
     //payload_size = 50;
     recv_packet(payload, payload_size);
 

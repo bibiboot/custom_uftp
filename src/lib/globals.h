@@ -41,8 +41,8 @@
 #define SEQ_NUM_LEN 12
 #define CHECKSUM_LEN 10
 
-//#define INF0 "eth0"
-#define INF0 "wlan0"
+#define INF0 "eth0"
+//#define INF0 "wlan0"
 
 #define PACKET_LEN 65536
 
@@ -81,14 +81,6 @@ struct globals {
     My402List nackl;
     // Current maximum recieved seq num
     vlong current_seq;
-    // Reciever fd
-    //int a_recv_fd;
-    //int b_recv_fd;
-    // Sender fd
-    //int a_sender_fd;
-    //int b_sender_fd;
-    // Socket address to the reciever used by NodeB
-    //struct sockaddr_in serv_addr;
     // Stores the hostname of nodeB provided at command line
     char hostname_b[100];
     char hostname_a[100];
@@ -104,6 +96,7 @@ struct globals {
     struct timeval b_reciever_end;
     //pthread_t sen_th, rev_th;
     long long unsigned int total_retrans;
+    long long unsigned int total_nack_recv;
 
     pthread_t sniff_th, sender_th;
     uint16_t src_node, dest_node;

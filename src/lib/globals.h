@@ -94,7 +94,6 @@ struct globals {
     struct timeval a_sender_start;
     struct timeval dummy_reached;
     struct timeval b_reciever_end;
-    //pthread_t sen_th, rev_th;
     long long unsigned int total_retrans;
     long long unsigned int total_nack_recv;
 

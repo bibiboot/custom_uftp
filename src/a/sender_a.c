@@ -61,7 +61,7 @@ int send_dummy_packet(){
     create_packet(packet, ROUTER_MAC, NODE1_IP, NODE2_IP, DATA_PORT, payload, payload_size);
 
     int i;
-    for (i = 0; i <= 10000; i++)
+    for (i = 0; i <= NUM_DUMMY_PACKETS; i++)
         send_packet_on_line(INF0, packet, packet_size);
 
     free(payload);

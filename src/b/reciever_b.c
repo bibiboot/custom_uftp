@@ -1,21 +1,9 @@
 #include "reciever_b.h"
 #include "filter.h"
 #include "print_packet.h"
+#include "util.h"
 
-#define PACKET_LEN 65536
 void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr);
-
-bool is_nack_list_empty() {
-    if ((globals.nackl).num_members == 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool is_last_packet_recieved() {
-    return globals.last_bit_arrived;
-}
 
 void *reciever(void *val)
 {
@@ -46,10 +34,6 @@ void *reciever(void *val)
         // break out of the loop
         if (is_last_packet_recieved() &&
             is_nack_list_empty()) {
-            // Delete the nack timer
-            // Break out of the loop
-            // Return
-            // TODO: Delete the nack timer
             printf("[DEBUG] NACK list is empty and last bit received\n");
             goto COMPLETE_FILE_REACHED;
         }
@@ -69,31 +53,21 @@ COMPLETE_FILE_REACHED:
 void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
 {
     int saddr_size = sizeof saddr;
-    // Receive a packet
     int data_size = recvfrom(sock_raw , buffer , PACKET_LEN ,
                              0 , &saddr , (socklen_t*)&saddr_size);
-    if(data_size <0 )
-    {
+    if(data_size <0 ) {
         printf("Error: Recvfrom error , failed to get packets\n");
         return ;
     }
 
-    if ( !is_allowed(buffer) )
+    if ( !is_data_allowed(buffer) )
         return;
 
-
     unsigned char *payload = buffer + C_HLEN;
-    int payload_size = (data_size - 8);
-
-    //printf("Data size xxx = %d\n", data_size);
-    //printf("Payload size = %d\n", payload_size);
-    //printf("Payload size = %d\n", data_size - 8);
+    int payload_size = (data_size - C_HLEN);
 
     //print_human_read_payload(buffer, data_size);
-    //payload_size = 50;
     recv_packet(payload, payload_size);
-
-    memset(buffer, '\0', PACKET_LEN);
 }
 
 int recv_packet(char *buffer, int payload_size){
@@ -104,7 +78,7 @@ int recv_packet(char *buffer, int payload_size){
     switch (packet_type) {
         case DATA_PACKET:
             data_packet_handler(buffer, payload_size);
-            printf(KGRN "Data receieved\n" RESET);
+            //printf(KGRN "Data receieved\n" RESET);
             break;
         case DUMMY_PACKET:
             dummy_packet_handler(buffer, payload_size);
@@ -136,9 +110,6 @@ void data_packet_handler(char *buffer, int size_recieved) {
         globals.current_seq = seq_num_int;
     }
 
-    //DBG("[DATA RECV] SIZE RECV: %d, SEQ: %s,  CURR MAX: %llu",
-     //   size_recieved, seq_num, globals.current_seq);
-
     // Checksum matched and sequence number known
     // Update the memory pointer
     update_mem_ptr_data_link(payload, sq_num, payload_size);
@@ -146,7 +117,6 @@ void data_packet_handler(char *buffer, int size_recieved) {
     // Remove the node from the nack list
     delete_node_nack_list(sq_num);
 
-    //TODO: Free the seq_num and checksum
     free(checksum);
 }
 

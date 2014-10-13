@@ -7,3 +7,7 @@
 #include "util.h"
 
 bool is_allowed(unsigned char *packet);
+
+bool is_nack_allowed(unsigned char *packet);
+
+bool is_data_allowed(unsigned char *packet);

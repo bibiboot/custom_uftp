@@ -6,7 +6,6 @@
 #include "parser.h"
 #include "packetize.h"
 #include "reciever_b.h"
-#include "packet_sniffer.h"
 
 void init()
 {

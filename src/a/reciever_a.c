@@ -1,44 +1,6 @@
 #include "reciever_a.h"
 #include "filter.h"
-
-bool is_nack_list_empty() {
-    if ((globals.nackl).num_members == 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
-{
-    int saddr_size = sizeof saddr;
-    // Receive a packet
-    int data_size = recvfrom(sock_raw , buffer , PACKET_LEN ,
-                             0 , &saddr , (socklen_t*)&saddr_size);
-    if(data_size <0 )
-    {
-        printf("Error: Recvfrom error , failed to get packets\n");
-        return ;
-    }
-
-    if ( !is_allowed(buffer) )
-        return;
-
-    unsigned char *payload = buffer + C_HLEN;
-    int payload_size = data_size - C_HLEN;
-
-    int packet_type = get_recieved_packet_type(payload);
-
-    switch (packet_type) {
-        case NACK_PACKET:
-            //printf("DEBUG] Recived a NACK\n");
-            nack_packet_handler(payload, payload_size);
-            globals.total_nack_recv++;
-            break;
-        default:
-            printf("[SUMMARY] Unknown packet type\n");
-    }
-}
+#include "util.h"
 
 void *reciever(void *v)
 {
@@ -58,6 +20,38 @@ void *reciever(void *v)
     while (1){
         memset(buffer, '\0', PACKET_LEN);
         sniff_packet(sock_raw, buffer, saddr);
+    }
+}
+
+void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
+{
+    int saddr_size = sizeof saddr;
+    // Receive a packet
+    int data_size = recvfrom(sock_raw , buffer , PACKET_LEN ,
+                             0 , &saddr , (socklen_t*)&saddr_size);
+    if(data_size <0 )
+    {
+        printf("Error: Recvfrom error , failed to get packets\n");
+        return ;
+    }
+
+    //if ( !is_nack_allowed(buffer) )
+    if ( !is_data_allowed(buffer) )
+        return;
+
+    unsigned char *payload = buffer + C_HLEN;
+    int payload_size = data_size - C_HLEN;
+
+    int packet_type = get_recieved_packet_type(payload);
+
+    switch (packet_type) {
+        case NACK_PACKET:
+            //printf("DEBUG] Recived a NACK\n");
+            nack_packet_handler(payload, payload_size);
+            globals.total_nack_recv++;
+            break;
+        default:
+            printf("[SUMMARY] Unknown packet type\n");
     }
 }
 

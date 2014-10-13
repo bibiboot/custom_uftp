@@ -7,12 +7,8 @@ void alarm_handler(int signal){
         return;
     }
 
-    //DBG("[SIGNAL] NACK LEN = %d", globals.nackl.num_members);
     if ((globals.nackl).num_members != 0) {
-        // Read the nack list
-        //print_list(&globals.datal);
         send_nack_packet();
-
         // Register another alarm
         register_signal();
     }
@@ -34,6 +30,7 @@ void register_signal(){
     sigdelset(&mask, SIGALRM);
 
     // Wait with this mask
-    alarm(globals.config.nack_timer);
+    //alarm(globals.config.nack_timer);
+    ualarm(1000, 0);
     sigsuspend(&mask);
 }

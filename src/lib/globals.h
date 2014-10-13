@@ -45,6 +45,7 @@
 //#define INF0 "wlan0"
 
 #define PACKET_LEN 65536
+#define NUM_DUMMY_PACKETS 10
 
 FILE *LOGFILE;
 

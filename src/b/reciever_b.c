@@ -12,8 +12,6 @@ void *reciever(void *val)
     unsigned char *buffer = (unsigned char *) malloc(PACKET_LEN);
     memset(buffer, '\0', PACKET_LEN);
 
-    printf("Starting...\n");
-
     int sock_raw = socket( AF_PACKET , SOCK_RAW , htons(ETH_P_ALL)) ;
 
     if (sock_raw < 0) {
@@ -43,10 +41,13 @@ void *reciever(void *val)
     }
 COMPLETE_FILE_REACHED:
     gettimeofday(&globals.b_reciever_end, NULL);
-    printf("[SUMMARY] Complete file received, end-time : %u\n", to_micro(globals.b_reciever_end));
+    printf(KGRN "[SUMMARY] File received, duplicates : %llu, end-time : %llu ms\n" RESET,
+            globals.total_retrans,
+            to_milli(globals.b_reciever_end));
     write_data_list_to_file(globals.recv_filename);
     // Cancel the other thread
     printf("[DEBUG] Cancel the timer thread\n");
+    fflush(stdout);
     pthread_cancel(globals.sender_th);
 }
 
@@ -82,7 +83,7 @@ int recv_packet(char *buffer, int payload_size){
             break;
         case DUMMY_PACKET:
             dummy_packet_handler(buffer, payload_size);
-            printf(KGRN "Dummy receieved\n" RESET);
+            //printf(KGRN "Dummy receieved\n" RESET);
             break;
         default:
             printf(KRED "[DEBUG] packet type not matched, packet dropped\n" RESET);
@@ -100,8 +101,9 @@ void data_packet_handler(char *buffer, int size_recieved) {
 
     // Check if duplicate packet
     if (is_duplicate(seq_num_int)) {
-        DBG("[DUPLICATE RECV] SEQ NUM: %llu", seq_num_int);
-        // Free all the memory taken
+        printf(KRED "[DEBUG] Duplicate seq num : %llu\n" RESET, seq_num_int);
+        globals.total_retrans++;
+        free(checksum);
         return;
     }
 
@@ -123,7 +125,7 @@ void data_packet_handler(char *buffer, int size_recieved) {
 void dummy_packet_handler(char *buffer, int size_recieved) {
 
     if (globals.last_bit_arrived) {
-        printf("[DEBUG] Duplicate Dummy packet received\n");
+        printf("KRED [DEBUG] Duplicate Dummy packet received\n" RESET);
         return;
     }
 

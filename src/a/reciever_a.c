@@ -8,7 +8,7 @@ void *reciever(void *v)
     struct sockaddr saddr;
     unsigned char *buffer = (unsigned char *) malloc(PACKET_LEN);
 
-    printf("Starting...\n");
+    printf("[DEBUG] Sniff for NACK packets ......\n");
 
     int sock_raw = socket( AF_PACKET , SOCK_RAW , htons(ETH_P_ALL)) ;
 

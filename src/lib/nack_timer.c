@@ -30,7 +30,7 @@ void register_signal(){
     sigdelset(&mask, SIGALRM);
 
     // Wait with this mask
-    //alarm(globals.config.nack_timer);
-    ualarm(1000, 0);
+    // 10000 Microseconds
+    ualarm(globals.config.nack_timer, 0);
     sigsuspend(&mask);
 }

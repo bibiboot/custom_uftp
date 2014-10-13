@@ -21,18 +21,27 @@ void init(){
 }
 
 int cmd_parser(int argc, char *argv[]){
-    if (argc != 3) {
+    char temp[100];
+    if (argc != 4) {
         return 1;
     }
 
-    int num = sscanf(argv[2], "%[^:]:%s", globals.hostname_b, globals.recv_filename);
+    int num = sscanf(argv[2], "%[^:]:%s", temp, globals.recv_filename);
     if (num != 2) {
         return 1;
     }
 
     strcpy(globals.filename, argv[1]);
-    globals.src_node = 1;
-    globals.dest_node = 2;
+    //globals.src_node = 1;
+    //globals.dest_node = 2;
+
+    globals.src_node = atoi(argv[3]);
+    globals.dest_node = atoi(temp);
+
+    sprintf(globals.recv_filename, "%s_%d_%d",
+            globals.recv_filename,
+            globals.src_node,
+            globals.dest_node);
 
     return 0;
 }
@@ -49,7 +58,8 @@ int main(int argc, char *argv[]){
 
     // Command line parsing
     if (cmd_parser(argc, argv) != 0) {
-        DBG("Error in parsing command line");
+        printf("Error in parsing command line\n");
+        exit(1);
     }
     printf("[SUMMARY] Source filename : %s, Dest filename : %s\n",
             globals.filename, globals.recv_filename);

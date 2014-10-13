@@ -42,7 +42,6 @@
 #define CHECKSUM_LEN 10
 
 #define INF0 "eth0"
-//#define INF0 "wlan0"
 
 #define PACKET_LEN 65536
 #define NUM_DUMMY_PACKETS 10
@@ -82,10 +81,6 @@ struct globals {
     My402List nackl;
     // Current maximum recieved seq num
     vlong current_seq;
-    // Stores the hostname of nodeB provided at command line
-    char hostname_b[100];
-    char hostname_a[100];
-    // The destination filename provided at command line is stored here
     char recv_filename[100];
     // The source filename provided at command line is stord here
     char filename[100];
@@ -106,5 +101,5 @@ struct globals {
 extern struct globals globals;
 
 unsigned int time_diff_micro(struct timeval end, struct timeval start);
-unsigned int to_micro(struct timeval tv);
+unsigned long long to_milli(struct timeval tv);
 int send_nack_packet();

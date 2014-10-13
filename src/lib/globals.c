@@ -21,9 +21,9 @@ unsigned int time_diff_micro(struct timeval end, struct timeval start){
   return ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec);
 }
 
-unsigned int to_micro(struct timeval tv){
+unsigned long long to_milli(struct timeval tv){
   //return tv.tv_sec* 1000000 + tv.tv_usec;
-  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+  return (tv.tv_sec *1000000 + tv.tv_usec)/1000;
 }
 
 int send_nack_packet()

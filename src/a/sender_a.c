@@ -16,7 +16,6 @@ void* sender(void *v){
             perror("Error on send");
             exit(1);
         }
-        //if(num_packets%50==0) sleep(2);
     }
     printf("[SUMMARY] Sender has tried sending complete file.....\n");
 
@@ -25,8 +24,8 @@ void* sender(void *v){
 
     // Send dummy data denotes the end of sending data
     send_dummy_packet();
-    printf("[SUMMARY] Start time : %u, Packets : %llu, Retransmission : %llu, Nack recv : %llu \n",
-            to_micro(globals.a_sender_start), num_packets, globals.total_retrans,globals.total_nack_recv);
+    printf(KGRN "[SUMMARY] Start time : %llu ms, Packets : %llu, Retransmission : %llu, Nack recv : %llu \n" RESET,
+            to_milli(globals.a_sender_start), num_packets, globals.total_retrans,globals.total_nack_recv);
 }
 
 int send_packet(struct node *data_node, bool is_retransmitted)
@@ -40,8 +39,6 @@ int send_packet(struct node *data_node, bool is_retransmitted)
 
     int packet_size = payload_size + C_HLEN;
     char *packet = malloc(packet_size);
-    //printf("Data size = %d\n", packet_size);
-    //printf("Payload size = %llu\n", payload_size);
 
     create_packet(packet, ROUTER_MAC, NODE1_IP, NODE2_IP, DATA_PORT, payload, payload_size);
 

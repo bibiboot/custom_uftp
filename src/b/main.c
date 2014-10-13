@@ -13,8 +13,6 @@ void init()
     // 10485760
     printf("Waiting for 10MB file\n");
     globals.config.total_size = 10485760;
-    //globals.config.total_size = 27;
-    //globals.config.total_size = 2106;
 
     // Create data list
     printf("[DEBUG] Create DATA and NACK list\n");
@@ -39,13 +37,13 @@ void start(){
 
 void cmd_parser(int argc, char *argv[])
 {
-    if (argc != 2) {
+    if (argc != 3) {
         printf("[SUMMARY] Error in command line parsing\n");
         exit(1);
     }
-    strcpy(globals.hostname_a, argv[1]);
-    globals.src_node = 2;
-    globals.dest_node = 1;
+
+    globals.src_node = atoi(argv[2]);
+    globals.dest_node = atoi(argv[1]);
 }
 
 int main(int argc, char *argv[]){

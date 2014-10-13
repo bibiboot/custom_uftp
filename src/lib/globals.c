@@ -22,7 +22,6 @@ unsigned int time_diff_micro(struct timeval end, struct timeval start){
 }
 
 unsigned long long to_milli(struct timeval tv){
-  //return tv.tv_sec* 1000000 + tv.tv_usec;
   return (tv.tv_sec *1000000 + tv.tv_usec)/1000;
 }
 
@@ -43,7 +42,7 @@ int send_nack_packet()
         char *packet = malloc(packet_size);
 
         //create_packet(packet, ROUTER_MAC, NODE2_IP, NODE1_IP, NACK_PORT, buffer, payload_size);
-        create_packet(packet, ROUTER_MAC, NODE2_IP, NODE1_IP, DATA_PORT, buffer, payload_size);
+        create_packet(packet, ROUTER_MAC, globals.own_node, globals.other_node, DATA_PORT, buffer, payload_size);
 
         send_packet_on_line(INF0, packet, packet_size);
 

@@ -32,16 +32,14 @@ int cmd_parser(int argc, char *argv[]){
     }
 
     strcpy(globals.filename, argv[1]);
-    //globals.src_node = 1;
-    //globals.dest_node = 2;
 
-    globals.src_node = atoi(argv[3]);
-    globals.dest_node = atoi(temp);
+    globals.own_node = atoi(argv[3]);
+    globals.other_node = atoi(temp);
 
     sprintf(globals.recv_filename, "%s_%d_%d",
             globals.recv_filename,
-            globals.src_node,
-            globals.dest_node);
+            globals.own_node,
+            globals.other_node);
 
     return 0;
 }

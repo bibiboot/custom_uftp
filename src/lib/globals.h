@@ -94,7 +94,7 @@ struct globals {
     long long unsigned int total_nack_recv;
 
     pthread_t sniff_th, sender_th;
-    uint16_t src_node, dest_node;
+    uint16_t own_node, other_node;
     int send_sock_fd;
 };
 

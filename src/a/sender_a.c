@@ -40,7 +40,8 @@ int send_packet(struct node *data_node, bool is_retransmitted)
     int packet_size = payload_size + C_HLEN;
     char *packet = malloc(packet_size);
 
-    create_packet(packet, ROUTER_MAC, NODE1_IP, NODE2_IP, DATA_PORT, payload, payload_size);
+    create_packet(packet, ROUTER_MAC, globals.own_node,
+                  globals.other_node, DATA_PORT, payload, payload_size);
 
     send_packet_on_line(INF0, packet, packet_size);
 
@@ -55,7 +56,9 @@ int send_dummy_packet(){
     vlong payload_size = create_dummy_packet(&payload);
     int packet_size = payload_size + C_HLEN;
     char *packet = malloc(packet_size);
-    create_packet(packet, ROUTER_MAC, NODE1_IP, NODE2_IP, DATA_PORT, payload, payload_size);
+    create_packet(packet, ROUTER_MAC, globals.own_node,
+                  globals.other_node, DATA_PORT, payload,
+                  payload_size);
 
     int i;
     for (i = 0; i <= NUM_DUMMY_PACKETS; i++)

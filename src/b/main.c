@@ -42,8 +42,8 @@ void cmd_parser(int argc, char *argv[])
         exit(1);
     }
 
-    globals.src_node = atoi(argv[2]);
-    globals.dest_node = atoi(argv[1]);
+    globals.own_node = atoi(argv[1]);
+    globals.other_node = atoi(argv[2]);
 }
 
 int main(int argc, char *argv[]){

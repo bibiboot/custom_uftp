@@ -23,7 +23,7 @@
 bool is_allowed(unsigned char *packet)
 {
     struct custom_ethernet *eth_header = (struct custom_ethernet*)packet;
-    if (ntohs(eth_header->dest_mac) == globals.src_node)
+    if (ntohs(eth_header->dest_mac) == globals.own_node)
         return true;
     return false;
 }
@@ -32,7 +32,7 @@ bool is_nack_allowed(unsigned char *packet)
 {
     struct custom_ethernet *eth_header = (struct custom_ethernet*)packet;
     struct custom_udp *udp_header = (struct custom_udp*)(packet + C_ETHLEN + C_IPLEN);
-    if (ntohs(eth_header->dest_mac) == globals.src_node && ntohs(udp_header->port) == NACK_PORT)
+    if (ntohs(eth_header->dest_mac) == globals.own_node && ntohs(udp_header->port) == NACK_PORT)
         return true;
     return false;
 }
@@ -41,7 +41,7 @@ bool is_data_allowed(unsigned char *packet)
 {
     struct custom_ethernet *eth_header = (struct custom_ethernet*)packet;
     struct custom_udp *udp_header = (struct custom_udp*)(packet + C_ETHLEN + C_IPLEN);
-    if (ntohs(eth_header->dest_mac) == globals.src_node && ntohs(udp_header->port) == DATA_PORT)
+    if (ntohs(eth_header->dest_mac) == globals.own_node && ntohs(udp_header->port) == DATA_PORT)
         return true;
     return false;
 }

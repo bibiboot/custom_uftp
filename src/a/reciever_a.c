@@ -39,6 +39,8 @@ void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
     if ( !is_data_allowed(buffer) )
         return;
 
+    //print_human_read_payload(buffer, data_size);
+
     unsigned char *payload = buffer + C_HLEN;
     int payload_size = data_size - C_HLEN;
 

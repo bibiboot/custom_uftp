@@ -35,8 +35,8 @@ void sniff_packet(int sock_raw, char *buffer, struct sockaddr saddr)
         return ;
     }
 
-    //if ( !is_nack_allowed(buffer) )
-    if ( !is_data_allowed(buffer) )
+    //if ( !is_data_allowed(buffer) )
+    if ( !is_nack_allowed(buffer) )
         return;
 
     //print_human_read_payload(buffer, data_size);

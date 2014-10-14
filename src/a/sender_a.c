@@ -1,10 +1,32 @@
 #include "sender_a.h"
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#define SYNC_FILENAME "etc/data/sync"
+
+int file_exist (char *filename)
+{
+      struct stat   buffer;
+      return (stat (filename, &buffer) == 0);
+}
+
+void busy_wait_for_sync()
+{
+    while(1) {
+        if (file_exist(SYNC_FILENAME))
+            return;
+    }
+}
 
 void* sender(void *v){
     // Iterate the data list and send data
     My402ListElem *elem=NULL;
     bool is_retransmitted = false;
     vlong num_packets = 0;
+
+    busy_wait_for_sync();
 
     printf("[SUMMARY] Start Sending.....\n");
     for (elem=My402ListFirst(&globals.datal); elem != NULL;

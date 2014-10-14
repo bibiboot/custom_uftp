@@ -41,8 +41,8 @@ int send_nack_packet()
         int packet_size = payload_size + C_HLEN;
         char *packet = malloc(packet_size);
 
-        //create_packet(packet, ROUTER_MAC, NODE2_IP, NODE1_IP, NACK_PORT, buffer, payload_size);
-        create_packet(packet, ROUTER_MAC, globals.own_node, globals.other_node, DATA_PORT, buffer, payload_size);
+        //create_packet(packet, ROUTER_MAC, globals.own_node, globals.other_node, DATA_PORT, buffer, payload_size);
+        create_packet(packet, ROUTER_MAC, globals.own_node, globals.other_node, NACK_PORT, buffer, payload_size);
 
         send_packet_on_line(INF0, packet, packet_size);
 

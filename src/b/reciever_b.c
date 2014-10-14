@@ -101,7 +101,7 @@ void data_packet_handler(char *buffer, int size_recieved) {
 
     // Check if duplicate packet
     if (is_duplicate(seq_num_int)) {
-        printf(KRED "[DEBUG] Duplicate seq num : %llu\n" RESET, seq_num_int);
+        //printf(KRED "[DEBUG] Duplicate seq num : %llu\n" RESET, seq_num_int);
         globals.total_retrans++;
         free(checksum);
         return;

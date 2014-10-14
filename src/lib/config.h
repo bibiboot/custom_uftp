@@ -7,7 +7,7 @@
     .total_size = 0, \
     .queue_len = 10000000, \
     .read_buffer_size = 1500,\
-    .nack_timer = 10000, \
+    .nack_timer = 100000, \
     .rtt = 2, }
 
 struct config {

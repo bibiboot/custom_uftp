@@ -48,6 +48,7 @@ void* sender(void *v){
     send_dummy_packet();
     printf(KGRN "[SUMMARY] Start time : %llu ms, Packets : %llu, Retransmission : %llu, Nack recv : %llu \n" RESET,
             to_milli(globals.a_sender_start), num_packets, globals.total_retrans,globals.total_nack_recv);
+    fflush(stdout);
 }
 
 int send_packet(struct node *data_node, bool is_retransmitted)

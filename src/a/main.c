@@ -45,7 +45,6 @@ int cmd_parser(int argc, char *argv[]){
 }
 
 void start(){
-    gettimeofday(&globals.a_sender_start, NULL);
 
     void *val;
     pthread_create(&globals.sniff_th, 0, reciever, val);

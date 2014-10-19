@@ -28,6 +28,8 @@ void* sender(void *v){
 
     busy_wait_for_sync();
 
+    gettimeofday(&globals.a_sender_start, NULL);
+
     printf("[SUMMARY] Start Sending.....\n");
     for (elem=My402ListFirst(&globals.datal); elem != NULL;
             elem=My402ListNext(&globals.datal, elem)) {
